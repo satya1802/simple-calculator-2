@@ -5,113 +5,55 @@
 <!-- sdlc:auto:start narrative -->
 ## Overview
 
-### ARCH-001 · approved · source: architecture:summary
+### ARCH-COMPONENTS · approved · source: architecture:components
 
-Simple calculator-2 is approved (version 1) as a client-side-only single-page web app performing standard arithmetic with no persistence or server-side logic.
+Four components define the system: the Calculator SPA (all logic/UI), static hosting+CDN, and two forward-looking placeholders (backend API, database) with no active logic in this version.
 
-The entire product lives in the browser as a React 19 SPA: all calculation state and arithmetic run client-side, nothing is stored or transmitted, and nothing persists between sessions. FastAPI 0.115 and PostgreSQL 16 are named as forward-looking defaults in the approved stack but carry no server-side logic or schema in this version. The app is hosted as static assets on AWS (S3 static hosting fronted by CloudFront) for fast, reliable, login-free, free public access on desktop and mobile browsers. Supported functionality: addition, subtraction, multiplication, division, percent, decimal entry, sign toggle, backspace, clear/reset, chained operations, and graceful divide-by-zero/invalid-operation error handling.
+- spa: Calculator SPA (React 19) renders the responsive button grid and display, handles on-screen and physical keyboard input, holds all calculator state, runs the arithmetic engine, and manages decimal/sign/backspace/clear and error states entirely in the browser.
+- static_host: Static Hosting + CDN (AWS S3 static hosting + CloudFront) serves the compiled SPA bundle globally over HTTPS with low latency so the app loads once with no further server round-trips.
+- backend: Backend Placeholder API (FastAPI 0.115) is provisioned with no current request handling; reserved for optional future server endpoints (e.g. usage analytics or shared history). Not on the critical path for this version.
+- db: Database (reserved) (PostgreSQL 16) is provisioned as the default persistence store for any future feature needing memory; no tables, writes or reads occur in this version since the calculator stores nothing.
 
-- ⚠ Architecture input does not state which specific requirement IDs (US-001..US-022) each capability (e.g. addition, percent, chaining) maps to -- requirement-to-architecture traceability is not explicit in this input.
+**Related:** US-001, US-002, US-003, US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-011, US-012, US-013, US-014, US-016, US-019, US-020, US-021, US-022
 
-### ARCH-002 · approved · source: architecture:components.spa
+### ARCH-CRITICAL-PATHS · approved · source: architecture:critical_paths
 
-Calculator SPA (React 19) is the sole functional component: it renders the UI and runs all calculator logic client-side.
+Three critical paths cover arithmetic evaluation (including chaining), divide-by-zero/invalid-operation handling, and keyboard/on-screen input parity.
 
-Renders the responsive button grid and display, handles on-screen and physical keyboard input, holds all calculator state, runs the arithmetic engine, and manages decimal/sign/backspace/clear and error states entirely in the browser. No backend calls are made.
+1. Evaluate an arithmetic operation: user enters first operand, operator, second operand, presses equals; engine computes add/subtract/multiply/divide/percent, applies digit limit, updates display. Supports chaining by using the running result as the next first operand.
+2. Divide-by-zero and invalid-operation handling: when division by zero or an undefined result is evaluated, the engine returns an error marker instead of a numeric value, the display enters an error state, and clear/reset returns the calculator to its initial zero state without reloading.
+3. Keyboard and on-screen input parity: physical keyboard keys (digits, + - * /, Enter for equals, Backspace, . and %) map to the same handlers as on-screen buttons so both input methods register once and update the display identically and immediately.
 
-### ARCH-003 · approved · source: architecture:components.static_host
+**Related:** US-001, US-002, US-003, US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-011, US-012, US-013, US-014
 
-Static Hosting + CDN (AWS S3 + CloudFront) serves the compiled SPA bundle globally over HTTPS.
+### ARCH-DEPLOYMENT-TOPOLOGY · approved · source: architecture:deployment_nodes
 
-Serves the compiled single-page app bundle globally with low latency over HTTPS so the calculator loads once and runs with no further server round-trips after initial load.
+Deployment topology is a static SPA bundle served from AWS S3 behind CloudFront, plus a provisioned-but-idle FastAPI/PostgreSQL pair for future use.
 
-**Related:** ARCH-002
+Nodes: (1) Calculator SPA static bundle running as compiled static JS/CSS/HTML in the browser; (2) S3 Static Hosting on AWS managed object storage; (3) CloudFront CDN on AWS managed global edge network fronting S3 for low-latency global delivery; (4) FastAPI Placeholder running on Python ASGI/uvicorn, provisioned but handling no requests; (5) PostgreSQL (reserved) on AWS managed PostgreSQL 16, provisioned with no schema or data in this version.
 
-### ARCH-004 · approved · source: architecture:components.backend
+- ⚠ Backend and database nodes are provisioned infrastructure with no defined schema, API spec, or usage yet -- confirm whether this idle cost/footprint is intended to persist across further versions or should be deferred until a feature needs it.
 
-Backend Placeholder API (FastAPI 0.115) is provisioned but inactive in this version, reserved for future optional endpoints.
+### ARCH-TECH-DECISIONS · approved · source: architecture:technology_decisions
 
-Provisioned FastAPI service with no current request handling; reserved as a future home for optional server endpoints (e.g. usage analytics or shared history) without re-platforming. Not on the critical path for this version.
+Four technology decisions were made: React 19 frontend, FastAPI 0.115 backend placeholder, PostgreSQL 16 reserved database, and AWS (S3+CloudFront) cloud hosting.
 
-- ⚠ No request handlers, routes, or contracts are defined yet since the component is a placeholder -- expected and noted, not a defect.
+- Frontend: React 19 chosen over Vue, Svelte, Vanilla JS -- renders the responsive button grid, drives instant display updates for on-screen taps and keyboard input, and ships as a single-page app with no server round-trips, matching NFR-002 and NFR-004.
+- Backend: FastAPI 0.115 chosen over Flask, Express, No backend -- no server-side logic exists in this client-only calculator; FastAPI is provisioned as a lightweight, ready place to add an endpoint later (e.g. usage analytics or shared history) without re-platforming.
+- Database: PostgreSQL 16 chosen over SQLite, DynamoDB, No database -- nothing is stored or persisted between sessions, so it defines no schema today but is named as the default store should a future feature (saved calculations, usage counts) need persistence.
+- Cloud: AWS chosen over Vercel, Netlify, Cloudflare Pages -- S3 static hosting plus CloudFront CDN keeps load times low for all desktop and mobile visitors (NFR-003) and keeps every layer on one provider for billing and operations.
 
-### ARCH-005 · approved · source: architecture:components.db
+- ⚠ NFR-002, NFR-003 and NFR-004 are referenced by these decisions but are not present in the known requirement keys list provided for this phase -- confirm these NFR ids are correctly tracked in the requirements set.
 
-Database (reserved) (PostgreSQL 16) is provisioned but unused -- no schema, tables, writes, or reads in this version.
+### ARCH-REVIEW-V1 · approved · source: architecture:summary
 
-Provisioned PostgreSQL instance kept as the default persistence store for any future feature that must be remembered. No tables, writes or reads in this version since the calculator stores nothing.
+This is a review revision (version 1, approved) of the architecture against unchanged requirements; every prior decision -- component ids, critical paths, empty data model, empty API spec, deployment topology, and technology decisions -- was carried forward unchanged with no new capabilities, services, or packages introduced.
 
-**Related:** ARCH-004
+The architecture documents simple calculator-2 as a client-side-only React 19 SPA performing addition, subtraction, multiplication, division and percent, with chained operations, decimal entry, sign toggle, backspace, clear/reset, digit limiting, and keyboard/on-screen input parity, plus graceful divide-by-zero and invalid-operation error handling -- all in-browser with nothing stored or transmitted. FastAPI 0.115 and PostgreSQL 16 are named as forward-looking defaults, provisioned but hosting no logic or schema in this version. The app is served as static assets from AWS S3 fronted by CloudFront for free, login-free, fast global access on desktop and mobile.
 
-- ⚠ No schema design exists yet; will need definition if/when a persistence feature is approved.
+**Related:** US-001, US-002, US-003, US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-011, US-012, US-013, US-014, US-016, US-019, US-020, US-021, US-022
 
-### ARCH-006 · approved · source: architecture:critical_paths.evaluate_operation
-
-Critical path for evaluating an arithmetic operation: operand-operator-operand-equals flow with chaining support.
-
-User enters a first operand, an operator and a second operand, then presses equals; the engine computes the result (add/subtract/multiply/divide/percent), applies the digit limit, and updates the display. Supports chaining by using the running result as the next first operand.
-
-**Related:** ARCH-002
-
-- ⚠ Specific requirement IDs behind each arithmetic operation (add/subtract/multiply/divide/percent) are not stated in this input.
-
-### ARCH-007 · approved · source: architecture:critical_paths.divide_by_zero
-
-Critical path for divide-by-zero and invalid-operation handling, including recovery via clear/reset.
-
-When a division by zero or an otherwise undefined result is evaluated, the engine returns an error marker instead of a numeric value, the display enters an error state, and clear/reset returns the calculator to its initial zero state without reloading.
-
-**Related:** ARCH-002, ARCH-006
-
-### ARCH-008 · approved · source: architecture:critical_paths.keyboard_parity
-
-Critical path ensuring keyboard and on-screen input parity so both input methods behave identically.
-
-Physical keyboard key presses (digits, + - * /, Enter for equals, Backspace, . and %) are mapped to the same handlers as the on-screen buttons so both input methods register once and update the display identically and immediately.
-
-**Related:** ARCH-002
-
-### ARCH-009 · approved · source: architecture:deployment_nodes
-
-Deployment topology: a static browser bundle served from S3 via CloudFront, plus reserved (inactive) FastAPI/PostgreSQL nodes.
-
-Five deployment nodes: (1) Calculator SPA static bundle -- React 19 single-page app compiled to static JS/CSS/HTML, runs in the browser; (2) S3 Static Hosting -- AWS S3 managed object storage holding the bundle; (3) CloudFront CDN -- AWS managed global edge network distributing the bundle; (4) FastAPI Placeholder -- Python ASGI (uvicorn) service, provisioned but idle; (5) PostgreSQL (reserved) -- AWS managed PostgreSQL 16 instance, provisioned but idle.
-
-**Related:** ARCH-002, ARCH-003, ARCH-004, ARCH-005
-
-### ARCH-010 · approved · source: architecture:technology_decisions.frontend
-
-Frontend technology decision: React 19, chosen over Vue, Svelte, and Vanilla JS.
-
-The entire product lives in the browser. React 19 renders the responsive button grid and drives instant display updates for both on-screen taps and keyboard input, and ships as a single-page app that loads once with no server round-trips, matching NFR-002 and NFR-004.
-
-- ⚠ NFR-002 and NFR-004 are referenced by this decision but are not present in the known requirement key list provided for this phase -- confirm these NFR IDs exist and are tracked.
-
-### ARCH-011 · approved · source: architecture:technology_decisions.backend
-
-Backend technology decision: FastAPI 0.115, chosen over Flask, Express, and no backend.
-
-There is no server-side logic in this client-only calculator, so FastAPI 0.115 is provisioned only as a lightweight, ready place to add an endpoint later (e.g. usage analytics or shared history) without re-platforming.
-
-**Related:** ARCH-004
-
-### ARCH-012 · approved · source: architecture:technology_decisions.database
-
-Database technology decision: PostgreSQL 16, chosen over SQLite, DynamoDB, and no database.
-
-Nothing is stored or persisted between sessions, so PostgreSQL 16 defines no schema today; it is named as the default dependable store should a future feature (saved calculations, usage counts) need persistence.
-
-**Related:** ARCH-005
-
-### ARCH-013 · approved · source: architecture:technology_decisions.cloud
-
-Cloud technology decision: AWS, chosen over Vercel, Netlify, and Cloudflare Pages.
-
-A free, public SPA must be reliably reachable worldwide; AWS S3 static hosting plus a CloudFront CDN keeps load times low for all desktop and mobile visitors (NFR-003) and keeps every layer on one provider for billing and operations.
-
-**Related:** ARCH-003
-
-- ⚠ NFR-003 is referenced by this decision but is not present in the known requirement key list provided for this phase -- confirm this NFR ID exists and is tracked.
+- ⚠ Data model is explicitly empty and API spec is explicitly empty in this version -- this is stated as intentional (no persistence, no server logic) rather than a documentation gap, but should be re-confirmed if a future version activates the backend/database.
 <!-- sdlc:auto:end narrative -->
 
 <!-- sdlc:auto:start building-blocks -->
@@ -218,8 +160,8 @@ sequenceDiagram
 
 | Source | Target | Protocol |
 |---|---|---|
-| CloudFront CDN | S3 Static Hosting | HTTPS |
 | Calculator SPA (static bundle) | CloudFront CDN | HTTPS |
+| CloudFront CDN | S3 Static Hosting | HTTPS |
 | FastAPI Placeholder | PostgreSQL (reserved) | TCP |
 
 ```mermaid
@@ -229,8 +171,8 @@ graph LR
   n_CloudFront_CDN["CloudFront CDN<br/>AWS CloudFront"]
   n_FastAPI_Placeholder["FastAPI Placeholder<br/>FastAPI 0.115"]
   n_PostgreSQL__reserved_["PostgreSQL (reserved)<br/>PostgreSQL 16"]
-  n_CloudFront_CDN -->|"HTTPS"| n_S3_Static_Hosting
   n_Calculator_SPA__static_bundle_ -->|"HTTPS"| n_CloudFront_CDN
+  n_CloudFront_CDN -->|"HTTPS"| n_S3_Static_Hosting
   n_FastAPI_Placeholder -->|"TCP"| n_PostgreSQL__reserved_
 ```
 <!-- sdlc:auto:end deployment-view -->

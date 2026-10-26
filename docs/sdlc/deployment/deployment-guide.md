@@ -28,8 +28,8 @@ graph LR
   n_CloudFront_CDN["CloudFront CDN<br/>AWS CloudFront"]
   n_FastAPI_Placeholder["FastAPI Placeholder<br/>FastAPI 0.115"]
   n_PostgreSQL__reserved_["PostgreSQL (reserved)<br/>PostgreSQL 16"]
-  n_CloudFront_CDN -->|"HTTPS"| n_S3_Static_Hosting
   n_Calculator_SPA__static_bundle_ -->|"HTTPS"| n_CloudFront_CDN
+  n_CloudFront_CDN -->|"HTTPS"| n_S3_Static_Hosting
   n_FastAPI_Placeholder -->|"TCP"| n_PostgreSQL__reserved_
 ```
 <!-- sdlc:auto:end topology -->

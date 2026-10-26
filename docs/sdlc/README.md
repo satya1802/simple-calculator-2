@@ -5,7 +5,7 @@
 <!-- sdlc:auto:start overview -->
 basic calculator
 
-**Documentation version:** v6
+**Documentation version:** v7
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -14,7 +14,7 @@ basic calculator
 | Document | State |
 |---|---|
 | [Requirements](requirements/README.md) | v5 approved |
-| [Architecture](architecture/README.md) | 13 entries |
+| [Architecture](architecture/README.md) | 5 entries |
 | [Development](development/README.md) | 0 entries |
 | [Testing](testing/README.md) | 0 entries |
 | [Deployment](deployment/README.md) | 0 entries |
@@ -31,7 +31,7 @@ basic calculator
 | [Runbook](deployment/runbook.md) | not deployed yet |
 | [Release notes](deployment/release-notes.md) | 0 releases |
 | [Traceability matrix](traceability-matrix.md) | 19 requirements |
-| [Changelog](CHANGELOG.md) | 6 versions |
+| [Changelog](CHANGELOG.md) | 7 versions |
 <!-- sdlc:auto:end contents -->
 
 ## Open gaps
@@ -45,10 +45,7 @@ basic calculator
 
 ### Architecture
 
-- Architecture input does not state which specific requirement IDs (US-001..US-022) each capability (e.g. addition, percent, chaining) maps to -- requirement-to-architecture traceability is not explicit in this input.
-- No request handlers, routes, or contracts are defined yet since the component is a placeholder -- expected and noted, not a defect.
-- No schema design exists yet; will need definition if/when a persistence feature is approved.
-- Specific requirement IDs behind each arithmetic operation (add/subtract/multiply/divide/percent) are not stated in this input.
-- NFR-002 and NFR-004 are referenced by this decision but are not present in the known requirement key list provided for this phase -- confirm these NFR IDs exist and are tracked.
-- NFR-003 is referenced by this decision but is not present in the known requirement key list provided for this phase -- confirm this NFR ID exists and is tracked.
+- Backend and database nodes are provisioned infrastructure with no defined schema, API spec, or usage yet -- confirm whether this idle cost/footprint is intended to persist across further versions or should be deferred until a feature needs it.
+- NFR-002, NFR-003 and NFR-004 are referenced by these decisions but are not present in the known requirement keys list provided for this phase -- confirm these NFR ids are correctly tracked in the requirements set.
+- Data model is explicitly empty and API spec is explicitly empty in this version -- this is stated as intentional (no persistence, no server logic) rather than a documentation gap, but should be re-confirmed if a future version activates the backend/database.
 <!-- sdlc:auto:end open-gaps -->
