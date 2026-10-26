@@ -5,7 +5,7 @@
 <!-- sdlc:auto:start overview -->
 basic calculator
 
-**Documentation version:** v5
+**Documentation version:** v6
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -14,7 +14,7 @@ basic calculator
 | Document | State |
 |---|---|
 | [Requirements](requirements/README.md) | v5 approved |
-| [Architecture](architecture/README.md) | 0 entries |
+| [Architecture](architecture/README.md) | 13 entries |
 | [Development](development/README.md) | 0 entries |
 | [Testing](testing/README.md) | 0 entries |
 | [Deployment](deployment/README.md) | 0 entries |
@@ -31,7 +31,7 @@ basic calculator
 | [Runbook](deployment/runbook.md) | not deployed yet |
 | [Release notes](deployment/release-notes.md) | 0 releases |
 | [Traceability matrix](traceability-matrix.md) | 19 requirements |
-| [Changelog](CHANGELOG.md) | 5 versions |
+| [Changelog](CHANGELOG.md) | 6 versions |
 <!-- sdlc:auto:end contents -->
 
 ## Open gaps
@@ -42,4 +42,13 @@ basic calculator
 - No architecture or App Design phase input yet to confirm how/whether this stack is actually applied (e.g. FastAPI/PostgreSQL/AWS specifics are not yet relevant since the app is client-side only).
 - US-009: 'sensible digit limit' and whether overflow is truncated, rounded, or shown compactly is left open -- exact digit count and chosen display strategy are not specified in requirements.
 - NFR-005 does not specify the exact digit limit or which single overflow strategy (truncate vs round vs compact form) will be used -- same gap as flagged under EPIC-003/US-009.
+
+### Architecture
+
+- Architecture input does not state which specific requirement IDs (US-001..US-022) each capability (e.g. addition, percent, chaining) maps to -- requirement-to-architecture traceability is not explicit in this input.
+- No request handlers, routes, or contracts are defined yet since the component is a placeholder -- expected and noted, not a defect.
+- No schema design exists yet; will need definition if/when a persistence feature is approved.
+- Specific requirement IDs behind each arithmetic operation (add/subtract/multiply/divide/percent) are not stated in this input.
+- NFR-002 and NFR-004 are referenced by this decision but are not present in the known requirement key list provided for this phase -- confirm these NFR IDs exist and are tracked.
+- NFR-003 is referenced by this decision but is not present in the known requirement key list provided for this phase -- confirm this NFR ID exists and is tracked.
 <!-- sdlc:auto:end open-gaps -->
