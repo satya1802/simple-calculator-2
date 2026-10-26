@@ -4,14 +4,17 @@ import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import { initialState, reduce, display, type Token, type CalcState } from "@/lib/calculator";
 
-const { X } = Icons;
-void X;
-
 const SCREEN = "Calculator";
 
-const mix = (colour: string, percent: number) => `color-mix(in srgb, ${colour} ${percent}%, transparent)`;
+const mix = (colour: string, percent: number) =>
+  `color-mix(in srgb, ${colour} ${percent}%, transparent)`;
 
-const OP_NAME: Record<string, string> = { "+": "add", "−": "subtract", "×": "multiply", "÷": "divide" };
+const OP_NAME: Record<string, string> = {
+  "+": "add",
+  "−": "subtract",
+  "×": "multiply",
+  "÷": "divide",
+};
 
 type KeyKind = "digit" | "op" | "util" | "clear" | "equals";
 
@@ -123,8 +126,7 @@ function keyStyle(k: Key, state: CalcState): React.CSSProperties {
 }
 
 export default function Screen() {
-  const AlertIcon = Icons.AlertCircle ?? (() => null);
-  const OkIcon = Icons.CheckCircle ?? (() => null);
+  const { AlertCircle: AlertIcon, CheckCircle: OkIcon } = Icons;
 
   const [state, dispatch] = React.useReducer(reduce, initialState);
   const [flash, setFlash] = React.useState<Token | null>(null);

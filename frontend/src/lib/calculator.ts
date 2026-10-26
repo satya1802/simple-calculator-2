@@ -95,6 +95,22 @@ function compute(a: number, b: number, operator: Token): ComputeResult {
   return { value: v };
 }
 
+/**
+ * Once a result is "done" (after =), the next entry key starts a fresh
+ * calculation. Digits, the decimal point, percent and backspace all restart
+ * tokens/acc/op; ± only restarts tokens/done, keeping the existing accumulator
+ * and pending operator (there is none left to lose once a result is shown).
+ */
+function resumeFromDone(
+  state: CalcState,
+  resetAccOp = true,
+): Pick<CalcState, "tokens" | "done" | "acc" | "op"> {
+  if (!state.done) return { tokens: state.tokens, done: state.done, acc: state.acc, op: state.op };
+  return resetAccOp
+    ? { tokens: [], done: false, acc: null, op: null }
+    : { tokens: [], done: false, acc: state.acc, op: state.op };
+}
+
 export function reduce(state: CalcState, token: Token): CalcState {
   const { entry, acc, op, fresh, hasOperand, tokens, done, error } = state;
   const limit = false;
@@ -107,7 +123,7 @@ export function reduce(state: CalcState, token: Token): CalcState {
 
   if (DIGIT_RE.test(token)) {
     if (done) {
-      return { ...state, tokens: [], done: false, acc: null, op: null, entry: token, fresh: false, hasOperand: true, limit };
+      return { ...state, ...resumeFromDone(state), entry: token, fresh: false, hasOperand: true, limit };
     }
     if (fresh) {
       return { ...state, entry: token, fresh: false, hasOperand: true, limit };
@@ -120,7 +136,7 @@ export function reduce(state: CalcState, token: Token): CalcState {
 
   if (token === ".") {
     if (done) {
-      return { ...state, tokens: [], done: false, acc: null, op: null, entry: "0.", fresh: false, hasOperand: true, limit };
+      return { ...state, ...resumeFromDone(state), entry: "0.", fresh: false, hasOperand: true, limit };
     }
     if (fresh) {
       return { ...state, entry: "0.", fresh: false, hasOperand: true, limit };
@@ -140,7 +156,14 @@ export function reduce(state: CalcState, token: Token): CalcState {
     if (op !== null && hasOperand && !done) {
       const r = compute(acc as number, parseFloat(entry), op);
       if (r.error) {
-        return { ...state, tokens: [...tokens, entry], error: r.error, done: true, op: null, limit };
+        return {
+          ...state,
+          tokens: [...tokens, entry],
+          error: r.error,
+          done: true,
+          op: null,
+          limit,
+        };
       }
       newAcc = r.value;
       newEntry = fmt(r.value as number);
@@ -168,13 +191,29 @@ export function reduce(state: CalcState, token: Token): CalcState {
 
   if (token === "=") {
     if (op === null) {
-      return { ...state, tokens: [fmt(parseFloat(entry))], done: true, fresh: true, hasOperand: false, limit };
+      return {
+        ...state,
+        tokens: [fmt(parseFloat(entry))],
+        done: true,
+        fresh: true,
+        hasOperand: false,
+        limit,
+      };
     }
     const b = parseFloat(entry);
     const r = compute(acc as number, b, op);
     const newTokens = [...tokens, fmt(b)];
     if (r.error) {
-      return { ...state, tokens: newTokens, op: null, done: true, fresh: true, hasOperand: false, error: r.error, limit };
+      return {
+        ...state,
+        tokens: newTokens,
+        op: null,
+        done: true,
+        fresh: true,
+        hasOperand: false,
+        error: r.error,
+        limit,
+      };
     }
     return {
       ...state,
@@ -199,22 +238,9 @@ export function reduce(state: CalcState, token: Token): CalcState {
         limit,
       };
     }
-    let newTokens = tokens;
-    let newDone = done;
-    let newAcc = acc;
-    let newOp = op;
-    if (done) {
-      newTokens = [];
-      newDone = false;
-      newAcc = null;
-      newOp = null;
-    }
     return {
       ...state,
-      tokens: newTokens,
-      done: newDone,
-      acc: newAcc,
-      op: newOp,
+      ...resumeFromDone(state),
       entry: fmt(v),
       fresh: true,
       hasOperand: true,
@@ -224,24 +250,11 @@ export function reduce(state: CalcState, token: Token): CalcState {
 
   if (token === "⌫") {
     if (fresh && !done) return { ...state, limit };
-    let newTokens = tokens;
-    let newDone = done;
-    let newAcc = acc;
-    let newOp = op;
-    if (done) {
-      newTokens = [];
-      newDone = false;
-      newAcc = null;
-      newOp = null;
-    }
     let s = entry.slice(0, -1);
     if (s === "" || s === "-") s = "0";
     return {
       ...state,
-      tokens: newTokens,
-      done: newDone,
-      acc: newAcc,
-      op: newOp,
+      ...resumeFromDone(state),
       entry: s,
       fresh: s === "0",
       hasOperand: true,
@@ -251,16 +264,9 @@ export function reduce(state: CalcState, token: Token): CalcState {
 
   if (token === "±") {
     if (entry === "0" || entry === "0.") return { ...state, limit };
-    let newTokens = tokens;
-    let newDone = done;
-    if (done) {
-      newTokens = [];
-      newDone = false;
-    }
     return {
       ...state,
-      tokens: newTokens,
-      done: newDone,
+      ...resumeFromDone(state, false),
       entry: entry.charAt(0) === "-" ? entry.slice(1) : "-" + entry,
       hasOperand: true,
       limit,
@@ -270,8 +276,13 @@ export function reduce(state: CalcState, token: Token): CalcState {
   return state;
 }
 
-export function display(state: CalcState): { value: string; expression: string; error: string | null } {
+export function display(state: CalcState): {
+  value: string;
+  expression: string;
+  error: string | null;
+} {
   const value = state.error ? "Error" : state.entry;
-  const liveTokens = state.hasOperand && !state.done ? [...state.tokens, state.entry] : state.tokens;
+  const liveTokens =
+    state.hasOperand && !state.done ? [...state.tokens, state.entry] : state.tokens;
   return { value, expression: liveTokens.join(" "), error: state.error };
 }
