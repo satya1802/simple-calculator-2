@@ -6,20 +6,19 @@ Date: 2026-10-26
 
 ## Context and Problem Statement
 
-Which Backend technology does the project use? Decided in architecture v1.
+Which Backend technology does the project use? Decided in architecture v2.
 
 ## Considered Options
 
 - FastAPI 0.115
-- Flask
 - Express
-- No backend
+- Django
 
 ## Decision Outcome
 
-Chosen option: FastAPI 0.115, because There is no server-side logic in this client-only calculator, so FastAPI 0.115 is provisioned only as a lightweight, ready place to add an endpoint later (e.g. usage analytics or shared history) without re-platforming.
+Chosen option: FastAPI 0.115, because No server-side logic is required today since the calculator is client-side only; FastAPI 0.115 is kept as the approved default, providing a ready place to add a future endpoint such as usage analytics without re-platforming.
 
 ## Consequences
 
-Carrying an idle backend adds a small amount of operational surface for no immediate function, accepted so the stack is future-ready and consistent across layers.
+Carries an unused backend layer now, but avoids a future migration and keeps the whole system on the approved stack.
 <!-- sdlc:auto:end adr -->

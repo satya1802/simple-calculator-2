@@ -6,20 +6,19 @@ Date: 2026-10-26
 
 ## Context and Problem Statement
 
-Which Cloud technology does the project use? Decided in architecture v1.
+Which Cloud technology does the project use? Decided in architecture v2.
 
 ## Considered Options
 
 - AWS
-- Vercel
-- Netlify
-- Cloudflare Pages
+- Azure
+- Cloudflare
 
 ## Decision Outcome
 
-Chosen option: AWS, because A free, public SPA must be reliably reachable worldwide; AWS S3 static hosting plus a CloudFront CDN keeps load times low for all desktop and mobile visitors (NFR-003) and keeps every layer on one provider for billing and operations.
+Chosen option: AWS, because A free, public SPA needs reliable worldwide reach; AWS static hosting (S3) plus a global CDN (CloudFront) keeps load times low for all visitors and keeps every layer on one provider for billing and operations (NFR-003).
 
 ## Consequences
 
-Configuring S3 + CloudFront is slightly more setup than a one-click static host, offset by consistent provider operations and a straightforward path to add the FastAPI/PostgreSQL layers later.
+AWS static+CDN setup is slightly more configuration than an all-in-one host, but gives global performance and consistency with the rest of the approved stack.
 <!-- sdlc:auto:end adr -->

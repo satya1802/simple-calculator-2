@@ -9,11 +9,8 @@ Pushes to `main` run `.github/workflows/deploy.yml`, which builds the API image 
 <!-- sdlc:auto:start environments -->
 | Name | Service | Runtime | Scaling | Environment |
 |---|---|---|---|---|
-| Calculator SPA (static bundle) | React 19 single-page app | Browser (compiled static JS/CSS/HTML) | CDN edge distribution; scales with CloudFront | dev |
-| S3 Static Hosting | AWS S3 | AWS managed object storage | Managed, effectively unlimited | dev |
-| CloudFront CDN | AWS CloudFront | AWS managed global edge network | Global edge caching, auto-scaled | dev |
-| FastAPI Placeholder | FastAPI 0.115 | Python ASGI (uvicorn) | Single small instance; idle, no traffic in MVP | dev |
-| PostgreSQL (reserved) | PostgreSQL 16 | AWS managed PostgreSQL | Single small instance; unused in MVP | dev |
+| SPA Bundle (S3) | AWS S3 | Static object storage | Managed by AWS, effectively unlimited for static assets | dev |
+| Global CDN (CloudFront) | AWS CloudFront | Edge CDN over HTTPS | Auto-scaled global edge network | dev |
 <!-- sdlc:auto:end environments -->
 
 <!-- sdlc:auto:start live -->
@@ -23,13 +20,8 @@ _Not deployed yet._
 <!-- sdlc:auto:start topology -->
 ```mermaid
 graph LR
-  n_Calculator_SPA__static_bundle_["Calculator SPA (static bundle)<br/>React 19 single-page app"]
-  n_S3_Static_Hosting["S3 Static Hosting<br/>AWS S3"]
-  n_CloudFront_CDN["CloudFront CDN<br/>AWS CloudFront"]
-  n_FastAPI_Placeholder["FastAPI Placeholder<br/>FastAPI 0.115"]
-  n_PostgreSQL__reserved_["PostgreSQL (reserved)<br/>PostgreSQL 16"]
-  n_Calculator_SPA__static_bundle_ -->|"HTTPS"| n_CloudFront_CDN
-  n_CloudFront_CDN -->|"HTTPS"| n_S3_Static_Hosting
-  n_FastAPI_Placeholder -->|"TCP"| n_PostgreSQL__reserved_
+  n_SPA_Bundle__S3_["SPA Bundle (S3)<br/>AWS S3"]
+  n_Global_CDN__CloudFront_["Global CDN (CloudFront)<br/>AWS CloudFront"]
+  n_Global_CDN__CloudFront_ -->|"HTTPS"| n_SPA_Bundle__S3_
 ```
 <!-- sdlc:auto:end topology -->

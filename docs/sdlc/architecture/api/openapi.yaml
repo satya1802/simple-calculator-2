@@ -2,6 +2,6 @@
 openapi: 3.1.0
 info:
   title: simple calculator-2
-  version: architecture-v1
+  version: architecture-v2
   description: Designed API from the approved architecture (not extracted from code).
 paths: {}

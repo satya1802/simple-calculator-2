@@ -5,134 +5,115 @@
 <!-- sdlc:auto:start narrative -->
 ## Overview
 
-### ARCH-REV-001 · approved · source: architecture:summary
+### ARCH-001 · approved · source: architecture:summary
 
-_2026-10-26_
+Simple Calculator-2 is an approved (v2) client-side-only single-page web application performing basic arithmetic, built entirely in React 19 and requiring no accounts, payments, or data persistence.
 
-Architecture version 1 is approved and re-affirms a previously approved design after re-review against unchanged functional requirements (requirements version 5). It is a client-side-only React 19 SPA covering arithmetic, chaining, decimal entry, sign toggle, backspace, clear/reset, digit limiting, keyboard parity, and error handling, served statically from AWS with no login and no persistence.
+Approved architecture, version 2. The app runs entirely in the visitor's browser (React 19 SPA) covering addition, subtraction, multiplication, division, percent, decimal entry, sign toggle, backspace, divide-by-zero/invalid-operation error handling, on-screen and physical keyboard input, and a responsive desktop/mobile layout. Delivery is via AWS S3 static hosting plus CloudFront CDN worldwide. FastAPI 0.115 and PostgreSQL 16 are named as approved backend/database defaults but perform no runtime work today; they are reserved only for a possible future server-side feature (e.g. usage analytics).
 
-This revision re-reviewed the prior approved architecture and carried forward unchanged: the four component ids (spa, static_host, backend, db), the three SPA critical paths, the empty data model, the empty API spec, the AWS deployment topology, and all four technology decisions. No new capabilities, services, endpoints, or packages were introduced in this pass.
+**Related:** US-001, US-002, US-003, US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-011, US-012, US-013, US-014, US-016, US-019, US-020, US-021, US-022
 
-**Related:** US-001, US-002, US-003, US-004, US-016, US-020, US-005, US-006, US-007, US-019, US-008, US-021, US-022, US-009, US-010, US-011, US-012, US-013, US-014
+### ARCH-002 · approved · source: architecture:components:calculator_spa
 
-- ⚠ Data model is empty and API spec is empty by design in this version; no schema or endpoints exist to trace against requirements.
-- ⚠ Out-of-scope scientific functions and a memory/history tape remain explicitly undesigned; confirm these are intentionally excluded from current requirement scope.
+The Calculator SPA (React 19) is the core and only functionally active component, rendering the UI and running all logic in-browser.
 
-### ARCH-SPA-001 · approved · source: architecture:components:spa
+Renders the responsive button grid and display, captures both on-screen and physical keyboard input, runs all arithmetic and error handling entirely client-side, and holds calculator state in memory only -- nothing is persisted across sessions.
 
-_2026-10-26_
+**Related:** US-001, US-002, US-003, US-004, US-005, US-006, US-007, US-008, US-016, US-020, US-021, US-022
 
-The Calculator SPA (React 19) is the sole component carrying application logic: it renders the button grid/display, accepts keyboard and on-screen input, and runs the arithmetic engine entirely client-side.
+### ARCH-003 · approved · source: architecture:components:static_hosting
 
-Responsibilities: render responsive button grid and display; handle on-screen and physical keyboard input; hold all calculator state; run the arithmetic engine; manage decimal entry, sign toggle, backspace, clear, and error states — all in-browser with nothing stored or transmitted.
+AWS S3 stores the built SPA bundle (HTML/JS/CSS) as static objects for delivery.
 
-- ⚠ Input does not specify which individual requirement (US-xxx) ids map to specific SPA behaviors; mapping left to requirements/design phase.
+Static Asset Hosting component: holds the compiled SPA bundle as static objects in S3; no server-side processing occurs here. Pairs with the CloudFront CDN (ARCH-004) for global delivery.
 
-### ARCH-STATIC-001 · approved · source: architecture:components:static_host
+### ARCH-004 · approved · source: architecture:components:cdn
 
-_2026-10-26_
+AWS CloudFront serves the SPA over HTTPS from edge locations worldwide for low-latency loads on desktop and mobile.
 
-Static Hosting + CDN (AWS S3 + CloudFront) serves the compiled SPA bundle globally over HTTPS so the app loads once with no further server round-trips.
+Global CDN component: delivers the S3-hosted bundle over HTTPS from edge locations. The app loads once and needs no further round-trips after initial load, supporting low-latency access on desktop and mobile per NFR-003.
 
-Serves compiled single-page app bundle globally with low latency over HTTPS; supports fast, login-free, free global access on desktop and mobile per NFR-003.
+- ⚠ Referenced NFR-003 is not present in the supplied list of known requirement keys -- confirm this requirement id exists and is correctly tracked.
 
-**Related:** NFR-003
+### ARCH-005 · approved · source: architecture:components:backend_api
 
-### ARCH-BACKEND-001 · approved · source: architecture:components:backend
+FastAPI 0.115 is the approved backend default but is not performing any server-side logic in the current build.
 
-_2026-10-26_
+Backend API (reserved) component: no server-side logic runs today since the calculator is entirely client-side. It is reserved as a ready place to add a future endpoint (e.g. usage analytics or shared history) without re-platforming.
 
-Backend Placeholder API (FastAPI 0.115) is provisioned but currently handles no requests; reserved for optional future server endpoints such as usage analytics or shared history.
+- ⚠ No current requirement drives active use of this component; it exists purely as a reserved future capability.
 
-Not on the critical path for this version. No endpoints, routes, or request handling exist yet. Exists solely to avoid re-platforming if server-side features are added later.
+### ARCH-006 · approved · source: architecture:components:database
 
-- ⚠ No API spec exists for this component; it is intentionally empty in this version — confirm no current requirement depends on server-side behavior.
+PostgreSQL 16 is the approved database default but writes no data today, since the calculator persists nothing.
 
-### ARCH-DB-001 · approved · source: architecture:components:db
+Database (reserved) component: approved default store, currently unused because the calculator does not persist any data. Reserved for any future feature that must remember state (e.g. saved calculations, usage counts).
 
-_2026-10-26_
+- ⚠ No current requirement drives active use of this component; it exists purely as a reserved future capability.
 
-Database (reserved), PostgreSQL 16, is provisioned as the default future persistence store but has no tables, writes, or reads in this version since the calculator stores nothing.
+### ARCH-007 · approved · source: architecture:critical_paths:Arithmetic evaluation and chaining
 
-Kept as default persistence store for any future feature requiring memory (e.g., saved calculations, usage counts). No schema defined.
+Describes the end-to-end flow for entering operands/operators and evaluating results, including chained operations.
 
-- ⚠ Data model is empty by design; no schema exists to document or trace.
+User enters a first operand, an operator, a second operand, and equals; the engine evaluates the operation and displays the result. Chaining reuses the running result as the next first operand, allowing successive operations without re-entering it.
 
-### ARCH-CP-001 · approved · source: architecture:critical_paths:Evaluate an arithmetic operation
+**Related:** US-001, US-002, US-003, US-004, US-016, US-020
 
-_2026-10-26_
+### ARCH-008 · approved · source: architecture:critical_paths:Input capture (buttons and keyboard)
 
-Defines the core calculation flow: user enters operand, operator, operand, presses equals, engine computes and displays result, with support for chained operations.
+On-screen taps/clicks and physical key presses are unified into the same input actions with immediate display updates.
 
-User enters a first operand, an operator, and a second operand, then presses equals; the engine computes the result for add/subtract/multiply/divide/percent, applies the digit limit, and updates the display. Chaining is supported by using the running result as the next first operand.
+On-screen button taps/clicks and physical keyboard key presses map to the same underlying input actions; each registers exactly once and updates the display immediately, ensuring consistent behavior regardless of input method.
 
-- ⚠ No explicit requirement ids were given in architecture input for this path; exact US-xxx traceability should be confirmed against requirements phase.
+**Related:** US-006, US-007, US-008, US-021, US-022
 
-### ARCH-CP-002 · approved · source: architecture:critical_paths:Divide-by-zero and invalid-operation handling
+- ⚠ Referenced NFR-002 is not present in the supplied list of known requirement keys -- confirm this requirement id exists and is correctly tracked.
 
-_2026-10-26_
+### ARCH-009 · approved · source: architecture:critical_paths:Error handling and recovery
 
-Defines error handling: division by zero or undefined results produce an error marker and error display state, recoverable via clear/reset without reload.
+Defines how divide-by-zero and invalid operations are surfaced and how the calculator recovers back to a clean state.
 
-When a division by zero or an otherwise undefined result is evaluated, the engine returns an error marker instead of a numeric value, the display enters an error state, and clear/reset returns the calculator to its initial zero state without reloading.
+Divide-by-zero and other invalid operations put the calculator into an error state that shows a clear indication rather than a misleading numeric value. Pressing clear/reset exits the error state back to the initial zero state without requiring a page reload.
 
-- ⚠ No explicit requirement ids were given in architecture input for this path; exact US-xxx traceability should be confirmed against requirements phase.
+**Related:** US-005, US-010, US-011
 
-### ARCH-CP-003 · approved · source: architecture:critical_paths:Keyboard and on-screen input parity
+- ⚠ Referenced NFR-006 is not present in the supplied list of known requirement keys -- confirm this requirement id exists and is correctly tracked.
 
-_2026-10-26_
+### ARCH-010 · approved · source: architecture:deployment_nodes
 
-Defines input parity: physical keyboard keys (digits, operators, Enter, Backspace, '.', '%') map to the same handlers as on-screen buttons, updating the display identically and immediately.
+Two deployment nodes deliver the SPA: an S3 static object store and a CloudFront edge CDN layer over HTTPS.
 
-Physical keyboard key presses (digits, + - * /, Enter for equals, Backspace, . and %) are mapped to the same handlers as the on-screen buttons so both input methods register once and update the display identically and immediately.
+SPA Bundle (S3): AWS S3 static object storage hosting the built bundle. Global CDN (CloudFront): AWS CloudFront edge CDN distributing the bundle over HTTPS worldwide. Together these form the entire runtime deployment topology -- there is no application server or database node active in production today.
 
-**Related:** NFR-002, NFR-004
+### ARCH-011 · approved · source: architecture:technology_decisions:Frontend
 
-- ⚠ No explicit requirement ids were given in architecture input for this path; exact US-xxx traceability should be confirmed against requirements phase.
+React 19 was selected as the frontend framework, over Vue and Svelte alternatives, to host the entire product's UI and logic.
 
-### ARCH-DEPLOY-001 · approved · source: architecture:deployment_nodes
+React 19 renders the responsive button grid and display, handles on-screen and keyboard input, and runs all arithmetic and error handling in the browser as a single-page app that loads once. Alternatives considered: Vue, Svelte.
 
-_2026-10-26_
+**Related:** US-001, US-002, US-003, US-004, US-005, US-006, US-007, US-008, US-009, US-010, US-011, US-012, US-013, US-014, US-016, US-019, US-020, US-021, US-022
 
-Deployment topology: compiled React SPA runs in-browser, served from S3 object storage fronted by CloudFront CDN; a provisioned FastAPI ASGI service and a managed PostgreSQL instance exist but are unused in this version.
+- ⚠ Rationale for choosing React over Vue/Svelte beyond 'entire product lives here' is not detailed in the input.
 
-Nodes: Calculator SPA (static bundle, compiled JS/CSS/HTML in browser); S3 Static Hosting (AWS S3, managed object storage); CloudFront CDN (AWS managed global edge network); FastAPI Placeholder (Python ASGI/uvicorn, FastAPI 0.115); PostgreSQL (reserved) (AWS managed PostgreSQL 16). Only the SPA, S3, and CloudFront are active in the critical path; FastAPI and PostgreSQL are provisioned but idle.
+### ARCH-012 · approved · source: architecture:technology_decisions:Backend
 
-### ARCH-TECH-001 · approved · source: architecture:technology_decisions:Frontend
+FastAPI 0.115 was named the approved backend default (over Express, Django) despite no current server-side need.
 
-_2026-10-26_
+No server-side logic is required today since the calculator is client-side only; FastAPI 0.115 is kept as the approved default, providing a ready place to add a future endpoint such as usage analytics without re-platforming. Alternatives considered: Express, Django.
 
-Frontend chosen as React 19 over Vue, Svelte, and Vanilla JS to drive instant display updates and ship as a single-page app with no server round-trips.
+### ARCH-013 · approved · source: architecture:technology_decisions:Database
 
-React 19 renders the responsive button grid and drives instant display updates for both on-screen taps and keyboard input, and ships as a single-page app that loads once with no server round-trips, matching NFR-002 and NFR-004.
+PostgreSQL 16 was named the approved database default (over MySQL, SQLite) despite no current persistence need.
 
-**Related:** NFR-002, NFR-004
+Nothing is persisted between sessions so no database is used today; PostgreSQL 16 is named as the approved default so any later need to remember data (saved calculations, usage counts) has a dependable store ready. Alternatives considered: MySQL, SQLite.
 
-### ARCH-TECH-002 · approved · source: architecture:technology_decisions:Backend
+### ARCH-014 · approved · source: architecture:technology_decisions:Cloud
 
-_2026-10-26_
+AWS (S3 + CloudFront) was selected as the cloud provider, over Azure and Cloudflare, to deliver the free public SPA worldwide on one provider.
 
-Backend chosen as FastAPI 0.115 over Flask, Express, or no backend, purely as a future-ready placeholder since this version has no server-side logic.
+A free, public SPA needs reliable worldwide reach; AWS static hosting (S3) plus a global CDN (CloudFront) keeps load times low for all visitors and keeps every layer on one provider for billing and operations, supporting NFR-003. Alternatives considered: Azure, Cloudflare.
 
-There is no server-side logic in this client-only calculator, so FastAPI 0.115 is provisioned only as a lightweight, ready place to add an endpoint later (e.g. usage analytics or shared history) without re-platforming.
-
-### ARCH-TECH-003 · approved · source: architecture:technology_decisions:Database
-
-_2026-10-26_
-
-Database chosen as PostgreSQL 16 over SQLite, DynamoDB, or no database, as a default future store even though nothing persists today.
-
-Nothing is stored or persisted between sessions, so PostgreSQL 16 defines no schema today; it is named as the default dependable store should a future feature (saved calculations, usage counts) need persistence.
-
-### ARCH-TECH-004 · approved · source: architecture:technology_decisions:Cloud
-
-_2026-10-26_
-
-Cloud chosen as AWS over Vercel, Netlify, and Cloudflare Pages to reliably and cheaply serve a free, public SPA worldwide on a single provider.
-
-A free, public SPA must be reliably reachable worldwide; AWS S3 static hosting plus a CloudFront CDN keeps load times low for all desktop and mobile visitors (NFR-003) and keeps every layer on one provider for billing and operations.
-
-**Related:** NFR-003
+- ⚠ Referenced NFR-003 is not present in the supplied list of known requirement keys -- confirm this requirement id exists and is correctly tracked.
 <!-- sdlc:auto:end narrative -->
 
 <!-- sdlc:auto:start building-blocks -->
@@ -140,89 +121,93 @@ A free, public SPA must be reliably reachable worldwide; AWS S3 static hosting p
 
 | ID | Name | Technology | Responsibility | Depends on |
 |---|---|---|---|---|
-| spa | Calculator SPA | React 19 | Renders the responsive button grid and display, handles on-screen and physical keyboard input, holds all calculator state, runs the arithmetic engine, and manages decimal/sign/backspace/clear and error states entirely in the browser. | — |
-| static_host | Static Hosting + CDN | AWS (S3 static hosting + CloudFront) | Serves the compiled single-page app bundle globally with low latency over HTTPS so the calculator loads once and runs with no further server round-trips. | spa |
-| backend | Backend Placeholder API | FastAPI 0.115 | Provisioned FastAPI service with no current request handling; reserved as a future home for optional server endpoints (e.g. usage analytics or shared history) without re-platforming. Not on the critical path for this version. | — |
-| db | Database (reserved) | PostgreSQL 16 | Provisioned PostgreSQL instance kept as the default persistence store for any future feature that must be remembered. No tables, writes or reads in this version since the calculator stores nothing. | — |
+| calculator_spa | Calculator SPA | React 19 | Renders the responsive button grid and display, captures on-screen and keyboard input, runs all arithmetic and error handling entirely in the browser, and holds calculator state in memory only (nothing persisted). | — |
+| static_hosting | Static Asset Hosting | AWS S3 | Stores the built SPA bundle (HTML, JS, CSS) as static objects for delivery. | — |
+| cdn | Global CDN | AWS CloudFront | Serves the SPA over HTTPS from edge locations worldwide for low-latency loads on desktop and mobile; the app loads once and needs no further round-trips. | static_hosting |
+| backend_api | Backend API (reserved) | FastAPI 0.115 | Approved backend default with no server-side logic today; reserved as a ready place to add a future endpoint (e.g. usage analytics or shared history) without re-platforming. | — |
+| database | Database (reserved) | PostgreSQL 16 | Approved database default; writes no data today because the calculator persists nothing, reserved for any future feature that must be remembered. | — |
 
 ```mermaid
 graph TD
-  c_spa["Calculator SPA"]
-  c_static_host["Static Hosting + CDN"]
-  c_backend["Backend Placeholder API"]
-  c_db["Database (reserved)"]
-  c_static_host --> c_spa
+  c_calculator_spa["Calculator SPA"]
+  c_static_hosting["Static Asset Hosting"]
+  c_cdn["Global CDN"]
+  c_backend_api["Backend API (reserved)"]
+  c_database["Database (reserved)"]
+  c_cdn --> c_static_hosting
 ```
 <!-- sdlc:auto:end building-blocks -->
 
 <!-- sdlc:auto:start runtime -->
 ## Runtime View
 
-### Evaluate an arithmetic operation
+### Arithmetic evaluation and chaining
 
-User enters a first operand, an operator and a second operand, then presses equals; the engine computes the result (add/subtract/multiply/divide/percent), applies the digit limit, and updates the display. Supports chaining by using the running result as the next first operand.
+User enters a first operand, an operator, a second operand and equals; the engine evaluates the operation and displays the result. Chaining reuses the running result as the next first operand (US-001..US-004, US-016, US-020).
 
-- **Components:** spa
-- **Modules:** CalculatorApp, CalculatorEngine, Display, Keypad
-- **Key functions:** inputDigit(d), inputOperator(op), inputDecimal(), applyPercent(), toggleSign(), evaluate(firstOperand, operator, secondOperand), formatForDisplay(value, maxDigits)
+- **Components:** calculator_spa
+- **Modules:** calculatorState, arithmeticEngine, displayFormatter
+- **Key functions:** applyDigit(state, digit), applyOperator(state, op), applyPercent(state), evaluate(firstOperand, op, secondOperand), formatForDisplay(value, maxDigits)
 
 ```mermaid
 sequenceDiagram
   participant User
-  participant Keypad
-  participant App as CalculatorApp
-  participant Engine as CalculatorEngine
+  participant UI as Buttons/Keyboard
+  participant State as calculatorState
+  participant Engine as arithmeticEngine
   participant Display
-  User->>Keypad: tap 2, +, 3, =
-  Keypad->>App: inputDigit/inputOperator/evaluate
-  App->>Engine: evaluate(2, +, 3)
-  Engine-->>App: 5
-  App->>Display: formatForDisplay(5)
+  User->>UI: enter 2, +, 3, =
+  UI->>State: applyDigit and applyOperator
+  State->>Engine: evaluate(2, plus, 3)
+  Engine-->>State: 5
+  State->>Display: formatForDisplay(5)
   Display-->>User: shows 5
 ```
 
-### Divide-by-zero and invalid-operation handling
+### Input capture (buttons and keyboard)
 
-When a division by zero or an otherwise undefined result is evaluated, the engine returns an error marker instead of a numeric value, the display enters an error state, and clear/reset returns the calculator to its initial zero state without reloading.
+On-screen taps/clicks and physical key presses map to the same input actions, each registering once and updating the display immediately (US-006, US-007, US-008, US-021, US-022, NFR-002).
 
-- **Components:** spa
-- **Modules:** CalculatorApp, CalculatorEngine, Display
-- **Key functions:** evaluate(firstOperand, operator, secondOperand), isError(result), clear(), renderError(message)
+- **Components:** calculator_spa
+- **Modules:** buttonGrid, keyboardHandler, inputMapper, calculatorState
+- **Key functions:** onButtonPress(key), onKeyDown(event), mapKeyToAction(key), applyDecimal(state), toggleSign(state), backspace(state)
 
 ```mermaid
 sequenceDiagram
   participant User
-  participant App as CalculatorApp
-  participant Engine as CalculatorEngine
+  participant Keyboard as keyboardHandler
+  participant Mapper as inputMapper
+  participant State as calculatorState
   participant Display
-  User->>App: 5 / 0 =
-  App->>Engine: evaluate(5, /, 0)
-  Engine-->>App: ERROR
-  App->>Display: renderError(Error)
-  Display-->>User: shows Error
-  User->>App: press Clear
-  App->>Display: reset to 0
-  Display-->>User: shows 0
+  User->>Keyboard: press 7 key
+  Keyboard->>Mapper: mapKeyToAction(7)
+  Mapper->>State: applyDigit(7)
+  State->>Display: update current entry
+  Display-->>User: shows 7
 ```
 
-### Keyboard and on-screen input parity
+### Error handling and recovery
 
-Physical keyboard key presses (digits, + - * /, Enter for equals, Backspace, . and %) are mapped to the same handlers as the on-screen buttons so both input methods register once and update the display identically and immediately.
+Divide-by-zero and other invalid operations put the calculator into an error state showing a clear indication rather than a misleading value; clear/reset exits the error back to the initial zero state with no reload (US-010, US-011, US-005, NFR-006).
 
-- **Components:** spa
-- **Modules:** CalculatorApp, KeyboardListener, Keypad, Display
-- **Key functions:** handleKeyDown(event), mapKeyToAction(key), dispatchAction(action), updateDisplay(state)
+- **Components:** calculator_spa
+- **Modules:** arithmeticEngine, calculatorState, displayFormatter
+- **Key functions:** evaluate(firstOperand, op, secondOperand), isInvalidResult(value), setErrorState(state), clear(state)
 
 ```mermaid
 sequenceDiagram
   participant User
-  participant Keyboard as KeyboardListener
-  participant App as CalculatorApp
+  participant State as calculatorState
+  participant Engine as arithmeticEngine
   participant Display
-  User->>Keyboard: press 7 then Enter
-  Keyboard->>App: mapKeyToAction and dispatchAction
-  App->>Display: updateDisplay(state)
-  Display-->>User: shows result
+  User->>State: enter 5, divide, 0, =
+  State->>Engine: evaluate(5, divide, 0)
+  Engine-->>State: invalid - division by zero
+  State->>Display: setErrorState
+  Display-->>User: shows Error
+  User->>State: press clear
+  State->>Display: reset to 0
+  Display-->>User: shows 0
 ```
 <!-- sdlc:auto:end runtime -->
 
@@ -231,28 +216,18 @@ sequenceDiagram
 
 | Name | Service | Runtime | Scaling | Environment |
 |---|---|---|---|---|
-| Calculator SPA (static bundle) | React 19 single-page app | Browser (compiled static JS/CSS/HTML) | CDN edge distribution; scales with CloudFront | dev |
-| S3 Static Hosting | AWS S3 | AWS managed object storage | Managed, effectively unlimited | dev |
-| CloudFront CDN | AWS CloudFront | AWS managed global edge network | Global edge caching, auto-scaled | dev |
-| FastAPI Placeholder | FastAPI 0.115 | Python ASGI (uvicorn) | Single small instance; idle, no traffic in MVP | dev |
-| PostgreSQL (reserved) | PostgreSQL 16 | AWS managed PostgreSQL | Single small instance; unused in MVP | dev |
+| SPA Bundle (S3) | AWS S3 | Static object storage | Managed by AWS, effectively unlimited for static assets | dev |
+| Global CDN (CloudFront) | AWS CloudFront | Edge CDN over HTTPS | Auto-scaled global edge network | dev |
 
 | Source | Target | Protocol |
 |---|---|---|
-| Calculator SPA (static bundle) | CloudFront CDN | HTTPS |
-| CloudFront CDN | S3 Static Hosting | HTTPS |
-| FastAPI Placeholder | PostgreSQL (reserved) | TCP |
+| Global CDN (CloudFront) | SPA Bundle (S3) | HTTPS |
 
 ```mermaid
 graph LR
-  n_Calculator_SPA__static_bundle_["Calculator SPA (static bundle)<br/>React 19 single-page app"]
-  n_S3_Static_Hosting["S3 Static Hosting<br/>AWS S3"]
-  n_CloudFront_CDN["CloudFront CDN<br/>AWS CloudFront"]
-  n_FastAPI_Placeholder["FastAPI Placeholder<br/>FastAPI 0.115"]
-  n_PostgreSQL__reserved_["PostgreSQL (reserved)<br/>PostgreSQL 16"]
-  n_Calculator_SPA__static_bundle_ -->|"HTTPS"| n_CloudFront_CDN
-  n_CloudFront_CDN -->|"HTTPS"| n_S3_Static_Hosting
-  n_FastAPI_Placeholder -->|"TCP"| n_PostgreSQL__reserved_
+  n_SPA_Bundle__S3_["SPA Bundle (S3)<br/>AWS S3"]
+  n_Global_CDN__CloudFront_["Global CDN (CloudFront)<br/>AWS CloudFront"]
+  n_Global_CDN__CloudFront_ -->|"HTTPS"| n_SPA_Bundle__S3_
 ```
 <!-- sdlc:auto:end deployment-view -->
 

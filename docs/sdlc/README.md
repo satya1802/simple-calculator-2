@@ -5,7 +5,7 @@
 <!-- sdlc:auto:start overview -->
 basic calculator
 
-**Documentation version:** v8
+**Documentation version:** v9
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -14,7 +14,7 @@ basic calculator
 | Document | State |
 |---|---|
 | [Requirements](requirements/README.md) | v5 approved |
-| [Architecture](architecture/README.md) | 13 entries |
+| [Architecture](architecture/README.md) | 14 entries |
 | [Development](development/README.md) | 0 entries |
 | [Testing](testing/README.md) | 0 entries |
 | [Deployment](deployment/README.md) | 0 entries |
@@ -31,7 +31,7 @@ basic calculator
 | [Runbook](deployment/runbook.md) | not deployed yet |
 | [Release notes](deployment/release-notes.md) | 0 releases |
 | [Traceability matrix](traceability-matrix.md) | 19 requirements |
-| [Changelog](CHANGELOG.md) | 8 versions |
+| [Changelog](CHANGELOG.md) | 9 versions |
 <!-- sdlc:auto:end contents -->
 
 ## Open gaps
@@ -45,10 +45,9 @@ basic calculator
 
 ### Architecture
 
-- Data model is empty and API spec is empty by design in this version; no schema or endpoints exist to trace against requirements.
-- Out-of-scope scientific functions and a memory/history tape remain explicitly undesigned; confirm these are intentionally excluded from current requirement scope.
-- Input does not specify which individual requirement (US-xxx) ids map to specific SPA behaviors; mapping left to requirements/design phase.
-- No API spec exists for this component; it is intentionally empty in this version — confirm no current requirement depends on server-side behavior.
-- Data model is empty by design; no schema exists to document or trace.
-- No explicit requirement ids were given in architecture input for this path; exact US-xxx traceability should be confirmed against requirements phase.
+- Referenced NFR-003 is not present in the supplied list of known requirement keys -- confirm this requirement id exists and is correctly tracked.
+- No current requirement drives active use of this component; it exists purely as a reserved future capability.
+- Referenced NFR-002 is not present in the supplied list of known requirement keys -- confirm this requirement id exists and is correctly tracked.
+- Referenced NFR-006 is not present in the supplied list of known requirement keys -- confirm this requirement id exists and is correctly tracked.
+- Rationale for choosing React over Vue/Svelte beyond 'entire product lives here' is not detailed in the input.
 <!-- sdlc:auto:end open-gaps -->

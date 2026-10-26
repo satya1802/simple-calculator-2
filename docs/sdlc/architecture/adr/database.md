@@ -6,20 +6,19 @@ Date: 2026-10-26
 
 ## Context and Problem Statement
 
-Which Database technology does the project use? Decided in architecture v1.
+Which Database technology does the project use? Decided in architecture v2.
 
 ## Considered Options
 
 - PostgreSQL 16
+- MySQL
 - SQLite
-- DynamoDB
-- No database
 
 ## Decision Outcome
 
-Chosen option: PostgreSQL 16, because Nothing is stored or persisted between sessions, so PostgreSQL 16 defines no schema today; it is named as the default dependable store should a future feature (saved calculations, usage counts) need persistence.
+Chosen option: PostgreSQL 16, because Nothing is persisted between sessions so no database is used today; PostgreSQL 16 is named as the approved default so any later need to remember data (saved calculations, usage counts) has a dependable store ready.
 
 ## Consequences
 
-A provisioned but unused database is pure future-readiness cost with no MVP benefit, accepted to avoid introducing a store under pressure later.
+Provisioned-but-unused capacity if deployed, but removes the risk of introducing a store under pressure later.
 <!-- sdlc:auto:end adr -->
